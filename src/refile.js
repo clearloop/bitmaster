@@ -1,24 +1,21 @@
-// refile.js
-var fs = require("fs");
-var cwd = process.cwd() + "/";
-
-function refile(dir, files) {
-
-	var _dir = [];	
-	var _files = [];
-
-	files !== undefined? _files = files: _files;
-	dir ? cwd = "": dir = fs.readdirSync(cwd,"utf8");
-	console.log(dir)
-	for(i in dir) {
-		dir[i] !== "node_modules"
-		&& ( fs.lstatSync(cwd + dir[i]).isFile() && _files.push(cwd + dir[i]) 
-			|| _dir.push(cwd + dir[i])
-		)
+// refile
+var refile = (target, dir, files) => {
+	var [_dirs, _files] = [[],[]];
+	target? target: target = process.cwd();
+	files?_files = files: _files;
+	
+	if(typeof target === "string"){
+		if(/^[^\.]*\.\w*/.test(target)){return target;} else {
+			(_dirs = require("fs").readdirSync(target)) && refile(_dirs, target, _files);
+		}
+	}else{
+		target.map((i)=>{
+			!(/^node_modules$|^\./.test(i))
+			&& refile(dir + "/" + i, i, _files)
+			&& _files.push(refile(dir + "/" + i, i, _files));
+		})
 	}
-	console.log(_files)
-	console.log(_dir)
-}
-refile()
-//refile();
+	return files === undefined? _files: false;
+};
 
+module.exports = refile
